@@ -1332,7 +1332,7 @@ class Zappa(object):
         if 'LoadBalancerArn' in alb_vpc_config:
             if not 'alb_listener_rules' in alb_vpc_config:
                 raise EnvironmentError('When Specifing an ALB, you must supply a Listener Rule')
-            if len(alb_vpc_config['alb_listener_rules']) != 1:
+            if len(alb_vpc_config['alb_listener_rules']) < 1:
                raise EnvironmentError('When Specifing an ALB, you must supply at least 1 Listener Rule')
             for rule in alb_vpc_config['alb_listener_rules']:
                 if not 'alb_listener_rule_conditions' in rule:

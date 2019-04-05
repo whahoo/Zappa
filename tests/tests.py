@@ -2053,10 +2053,10 @@ USE_TZ = True
                 "alb_listener_rules": [
                   {
                     "alb_listener_rule_conditions": [{
-                    "Field": "path-pattern",
-                    "Values": ["api/*"]
-                  }],
-                  "alb_listener_rule_priority": 1
+                      "Field": "path-pattern",
+                      "Values": ["api/*"]
+                    }],
+                    "alb_listener_rule_priority": 1
                   }]
             },
             "timeout": '30',
@@ -2164,8 +2164,8 @@ USE_TZ = True
                    "TargetGroupArn": targetgroup_arn
                }],
                "ListenerArn": listener_arn,
-               "Conditions": kwargs["alb_vpc_config"]["alb_listener_rule_conditions"],
-               "Priority" :  kwargs["alb_vpc_config"]["alb_listener_rule_priority"]
+               "Conditions": kwargs["alb_vpc_config"][0]["alb_listener_rule_conditions"],
+               "Priority" :  kwargs["alb_vpc_config"][0]["alb_listener_rule_priority"]
             },
             service_response={}
         )
