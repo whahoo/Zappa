@@ -1972,16 +1972,64 @@ USE_TZ = True
         with self.assertRaises(EnvironmentError) as context:
             zappa_core.deploy_lambda_alb(**kwargs)
 
+    def test_zappa_core_deploy_lambda_alb_existing_missing_listener_rules_conditions(self):
+        kwargs = {
+            "lambda_arn": "adatok",
+            "lambda_name": "test",
+            "alb_vpc_config": {
+                "LoadBalancerArn": str(uuid.uuid4()),
+                "alb_listener_rules": []
+            },
+            'timeout': '30',
+        }
+
+        zappa_core = Zappa(
+            boto_session=mock.Mock(),
+            profile_name="test",
+            aws_region="test",
+            load_credentials=False
+        )
+
+        with self.assertRaises(EnvironmentError) as context:
+            zappa_core.deploy_lambda_alb(**kwargs)
+
+    def test_zappa_core_deploy_lambda_alb_existing_missing_listener_rule_conditions_priority(self):
+        kwargs = {
+            "lambda_arn": "adatok",
+            "lambda_name": "test",
+            "alb_vpc_config": {
+                "LoadBalancerArn": str(uuid.uuid4()),
+                "alb_listener_rules": [
+                   {
+                      "alb_listener_rule_conditions": []
+                   }
+                ]
+            },
+            'timeout': '30',
+        }
+
+        zappa_core = Zappa(
+            boto_session=mock.Mock(),
+            profile_name="test",
+            aws_region="test",
+            load_credentials=False
+        )
+
+        with self.assertRaises(EnvironmentError) as context:
+            zappa_core.deploy_lambda_alb(**kwargs)
+
     def test_zappa_core_deploy_lambda_alb_existing_missing_listener_priority(self):
         kwargs = {
             "lambda_arn": "adatok",
             "lambda_name": "test",
             "alb_vpc_config": {
                 "LoadBalancerArn": str(uuid.uuid4()),
-                "alb_listener_rule_conditions": [{
-                    "Field": "path-pattern",
-                    "Values": ["api/*"]
-                }]
+                 "alb_listener_rules": [{
+                     "alb_listener_rule_conditions": [{
+                        "Field": "path-pattern",
+                        "Values": ["api/*"]
+                      }]
+                 }]
             },
             'timeout': '30',
         }
@@ -2002,11 +2050,14 @@ USE_TZ = True
             "lambda_name": str(uuid.uuid4()),
             "alb_vpc_config": {
                 "LoadBalancerArn": str(uuid.uuid4()),
-                "alb_listener_rule_conditions": [{
+                "alb_listener_rules": [
+                  {
+                    "alb_listener_rule_conditions": [{
                     "Field": "path-pattern",
                     "Values": ["api/*"]
-                 }],
-                 "alb_listener_rule_priority": 1
+                  }],
+                  "alb_listener_rule_priority": 1
+                  }]
             },
             "timeout": '30',
         }

@@ -1331,11 +1331,14 @@ class Zappa(object):
         # Use Existing ALB if specificed
         if 'LoadBalancerArn' in alb_vpc_config:
             if not 'alb_listener_rules' in alb_vpc_config:
-                for rule in alb_vpc_config['alb_listener_rules']:
-                    if not 'alb_listener_rules' in rule:
-                        raise EnvironmentError('When Specifing an ALB, you must supply a Listener Rule conditions for the listener.')
-                    if not 'alb_listener_rules' in rule:
-                        raise EnvironmentError('When Specifing an ALB, you must supply a Listener Rule priority for the listener.')
+                raise EnvironmentError('When Specifing an ALB, you must supply a Listener Rule')
+            if len(alb_vpc_config['alb_listener_rules']) != 1:
+               raise EnvironmentError('When Specifing an ALB, you must supply at least 1 Listener Rule')
+            for rule in alb_vpc_config['alb_listener_rules']:
+                if not 'alb_listener_rule_conditions' in rule:
+                    raise EnvironmentError('When Specifing an ALB, you must supply a Listener Rule conditions for the listener.')
+                if not 'alb_listener_rule_priority' in rule:
+                    raise EnvironmentError('When Specifing an ALB, you must supply a Listener Rule priority for the listener.')
 
             kwargs = dict(
                 LoadBalancerArns = [alb_vpc_config["LoadBalancerArn"]]
@@ -1449,8 +1452,8 @@ class Zappa(object):
             response = self.elbv2_client.describe_listeners(**kwargs)
             if not(response["Listeners"]) or len(response["Listeners"]) != 1:
                 raise EnvironmentError("Failure to load listeners for ALB. or more than 1 found, Response was in unexpected format. Response was: {}".format(repr(response)))
-            for rule in alb_vpc_config['alb_listener_rules']:
 
+            for rule in alb_vpc_config['alb_listener_rules']:
                 kwargs = dict(
                     Actions=[{
                         "Type": "forward",
@@ -1566,7 +1569,6 @@ class Zappa(object):
                     for action in rule['Actions']:
                         if action['Type'] == 'forward' and action['TargetGroupArn'] == target_group_arn:
                             self.elbv2_client.delete_rule(RuleArn=rule['RuleArn'])
-                            break
 
             # Deregister targets and wait for completion
             self.elbv2_client.deregister_targets(
