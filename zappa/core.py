@@ -1330,9 +1330,9 @@ class Zappa(object):
             raise EnvironmentError('When creating an ALB, alb_vpc_config must be filled out in zappa_settings.')
         # Use Existing ALB if specificed
         if 'LoadBalancerArn' in alb_vpc_config:
-            if not 'alb_listener_rule_conditions' in alb_vpc_config:
+            if not 'alb_listener_rules' in alb_vpc_config:
                 raise EnvironmentError('When Specifing an ALB, you must supply a Listener Rule conditions for the listener.')
-            if not 'alb_listener_rule_priority' in alb_vpc_config:
+            if not 'alb_listener_rules' in alb_vpc_config:
                 raise EnvironmentError('When Specifing an ALB, you must supply a Listener Rule priority for the listener.')
 
             kwargs = dict(
@@ -1447,17 +1447,18 @@ class Zappa(object):
             response = self.elbv2_client.describe_listeners(**kwargs)
             if not(response["Listeners"]) or len(response["Listeners"]) != 1:
                 raise EnvironmentError("Failure to load listeners for ALB. or more than 1 found, Response was in unexpected format. Response was: {}".format(repr(response)))
+            for rule in alb_vpc_config['alb_listener_rules']:
 
-            kwargs = dict(
-                Actions=[{
-                    "Type": "forward",
-                    "TargetGroupArn": target_group_arn,
-                }],
-                ListenerArn=response["Listeners"][0]["ListenerArn"],
-                Conditions=alb_vpc_config['alb_listener_rule_conditions'],
-                Priority=alb_vpc_config['alb_listener_rule_priority']
-            )
-            response = self.elbv2_client.create_rule(**kwargs)
+                kwargs = dict(
+                    Actions=[{
+                        "Type": "forward",
+                        "TargetGroupArn": target_group_arn,
+                    }],
+                    ListenerArn=response["Listeners"][0]["ListenerArn"],
+                    Conditions=rule['alb_listener_rule_conditions'],
+                    Priority=rule['alb_listener_rule_priority']
+                )
+                rule_create_response = self.elbv2_client.create_rule(**kwargs)
 
             print("ALB Listener Rule have been added to ALB with DNS: {}".format(load_balancer_dns))
 
