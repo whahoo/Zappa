@@ -1331,9 +1331,11 @@ class Zappa(object):
         # Use Existing ALB if specificed
         if 'LoadBalancerArn' in alb_vpc_config:
             if not 'alb_listener_rules' in alb_vpc_config:
-                raise EnvironmentError('When Specifing an ALB, you must supply a Listener Rule conditions for the listener.')
-            if not 'alb_listener_rules' in alb_vpc_config:
-                raise EnvironmentError('When Specifing an ALB, you must supply a Listener Rule priority for the listener.')
+                for rule in alb_vpc_config['alb_listener_rules']:
+                    if not 'alb_listener_rules' in rule:
+                        raise EnvironmentError('When Specifing an ALB, you must supply a Listener Rule conditions for the listener.')
+                    if not 'alb_listener_rules' in rule:
+                        raise EnvironmentError('When Specifing an ALB, you must supply a Listener Rule priority for the listener.')
 
             kwargs = dict(
                 LoadBalancerArns = [alb_vpc_config["LoadBalancerArn"]]
